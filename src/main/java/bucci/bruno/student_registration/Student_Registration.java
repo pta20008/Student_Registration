@@ -76,12 +76,12 @@ public class Student_Registration {
       return false;
     }
 
-    // Rule c) The number of classes must be an integer value between 1 and 8 (inclusive);
+    // Rule b) The number of classes must be an integer value between 1 and 8 (inclusive);
     if (numberOfClasses < 1 || numberOfClasses > 8) {
       return false;
     }
 
-    // Rule d) The "number" of the student must have a minimum of 6 characters,
+    // Rule c) The "number" of the student must have a minimum of 6 characters,
     // with the first 2 characters being numbers, the 3rd and 4th characters (and possibly the 5th)
     // being a letter, and everything after the last letter character being a number.
     if (!studentNumber.matches("^\\d{2}[a-zA-Z]{2,3}\\d+$")) {
