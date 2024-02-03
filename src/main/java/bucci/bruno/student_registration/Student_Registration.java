@@ -22,9 +22,11 @@ public class Student_Registration {
    * Method for processing student data, reading files and writing
    */
   private static void processStudentData() {
+    FileWriter writer = null;
+
     try {
       BufferedReader reader = new BufferedReader(new FileReader("students.txt"));
-      FileWriter writer = new FileWriter("status.txt");
+      writer = new FileWriter("status.txt");
 
       String line;
       while ((line = reader.readLine()) != null) {
@@ -49,9 +51,16 @@ public class Student_Registration {
       }
     } catch (IOException e) {
       e.printStackTrace();
+    } finally {
+      try {
+        if (writer != null) {
+          writer.close();
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
   }
-
 
   /**
    * Checks if the student data is valid according to the specified rules.
