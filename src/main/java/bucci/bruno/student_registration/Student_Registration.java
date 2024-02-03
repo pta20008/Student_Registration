@@ -28,16 +28,21 @@ public class Student_Registration {
 
       String line;
       while ((line = reader.readLine()) != null) {
+        // Splitting the line into parts using space as a separator
         String[] nameParts = line.split(" ");
 
+        // Rule: Ensure that the line contains at least two parts (first name and second name)
         if (nameParts.length >= 2) {
           String firstName = nameParts[0];
           String secondName = nameParts[1];
           int numberOfClasses = Integer.parseInt(reader.readLine());
 
+          // Extracting numeric part from student number
           String studentNumber = reader.readLine().replaceAll("\\D", "");
 
+          // Rule: Validate the student data
           if (isValidData(firstName, secondName, numberOfClasses, studentNumber)) {
+            // Rule: Write the valid data to the "status.txt" file
             writeToFile(writer, studentNumber, secondName, getWorkload(numberOfClasses));
           } else {
             System.out.println("Error: Invalid data for student");
@@ -65,6 +70,28 @@ public class Student_Registration {
    */
   private static boolean isValidData(String firstName, String secondName, int numberOfClasses,
       String studentNumber) {
+    // Rule a) The first name must contain only letters;
+    if (!firstName.matches("^[a-zA-Z]+$")) {
+      return false;
+    }
+
+    // Rule b) The second name can contain letters and/or numbers and must be separated from the first name by a single space;
+    if (!secondName.matches("^[a-zA-Z0-9]+ [a-zA-Z0-9]+$")) {
+      return false;
+    }
+
+    // Rule c) The number of classes must be an integer value between 1 and 8 (inclusive);
+    if (numberOfClasses < 1 || numberOfClasses > 8) {
+      return false;
+    }
+
+    // Rule d) The "number" of the student must have a minimum of 6 characters,
+    // with the first 2 characters being numbers, the 3rd and 4th characters (and possibly the 5th)
+    // being a letter, and everything after the last letter character being a number.
+    if (!studentNumber.matches("^\\d{2}[a-zA-Z]{1,2}\\d+$")) {
+      return false;
+    }
+
     return true;
   }
 
