@@ -106,8 +106,8 @@ public class Student_Registration {
    */
   private static void writeToFile(FileWriter writer, String studentNumber, String secondName,
       String workload) throws IOException {
-    // Writing student data to the file with proper formatting
-    writer.write(studentNumber + " – " + secondName + "\n" + workload + "\n");
+    // Writing formatted student data to the file
+    writer.write(String.format("%s – %s\n%s\n", studentNumber, secondName, workload));
   }
 
   /**
@@ -124,9 +124,12 @@ public class Student_Registration {
       return "Light";
     } else if (numberOfClasses >= 3 && numberOfClasses <= 5) {
       return "Part Time";
-    } else {
+    } else if (numberOfClasses >= 6) {
       return "Full Time";
+    } else {
+      return "Invalid Number of Classes";
     }
   }
+
 
 }
