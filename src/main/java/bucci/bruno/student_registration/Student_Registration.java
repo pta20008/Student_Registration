@@ -106,6 +106,7 @@ public class Student_Registration {
    */
   private static void writeToFile(FileWriter writer, String studentNumber, String secondName,
       String workload) throws IOException {
+    // Writing student data to the file with proper formatting
     writer.write(studentNumber + " – " + secondName + "\n" + workload + "\n");
   }
 
@@ -116,7 +117,16 @@ public class Student_Registration {
    * @return A string representing the workload based on the specified criteria.
    */
   private static String getWorkload(int numberOfClasses) {
-    return "";
+    // Determine workload based on the number of classes
+    if (numberOfClasses == 1) {
+      return "Very Light";
+    } else if (numberOfClasses == 2) {
+      return "Light";
+    } else if (numberOfClasses >= 3 && numberOfClasses <= 5) {
+      return "Part Time";
+    } else {
+      return "Full Time";
+    }
   }
 
 }
