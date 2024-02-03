@@ -28,22 +28,18 @@ public class Student_Registration {
 
       String line;
       while ((line = reader.readLine()) != null) {
-        // Splitting the line into parts using space as a separator
-        String[] nameParts = line.split(" ");
-
-        // Rule: Ensure that the line contains at least two parts (first name and second name)
-        if (nameParts.length >= 2) {
-          String firstName = nameParts[0];
-          String secondName = nameParts[1];
+        // Rule: Ensure that the line contains at least one part (full name)
+        if (!line.isEmpty()) {
+          String fullName = line;
           int numberOfClasses = Integer.parseInt(reader.readLine());
 
-          // Extracting numeric part from student number
-          String studentNumber = reader.readLine().replaceAll("\\D", "");
+          String studentNumberLine = reader.readLine();
+          String studentNumber = studentNumberLine.trim().replaceAll("[^0-9a-zA-Z]", "");
 
           // Rule: Validate the student data
-          if (isValidData(firstName, secondName, numberOfClasses, studentNumber)) {
+          if (isValidData(fullName, numberOfClasses, studentNumber)) {
             // Rule: Write the valid data to the "status.txt" file
-            writeToFile(writer, studentNumber, secondName, getWorkload(numberOfClasses));
+            writeToFile(writer, studentNumber, fullName, getWorkload(numberOfClasses));
           } else {
             System.out.println("Error: Invalid data for student");
           }
@@ -51,32 +47,23 @@ public class Student_Registration {
           System.out.println("Error: Invalid data format for student");
         }
       }
-
-      reader.close();
-      writer.close();
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
+
   /**
    * Checks if the student data is valid according to the specified rules.
    *
-   * @param firstName       The first name of the student.
-   * @param secondName      The second name of the student.
+   * @param fullName        The first name of the student.
    * @param numberOfClasses The number of classes the student is enrolled in.
    * @param studentNumber   The student number.
    * @return True if the data is valid, False otherwise.
    */
-  private static boolean isValidData(String firstName, String secondName, int numberOfClasses,
-      String studentNumber) {
-    // Rule a) The first name must contain only letters;
-    if (!firstName.matches("^[a-zA-Z]+$")) {
-      return false;
-    }
-
-    // Rule b) The second name can contain letters and/or numbers and must be separated from the first name by a single space;
-    if (!secondName.matches("^[a-zA-Z0-9]+ [a-zA-Z0-9]+$")) {
+  private static boolean isValidData(String fullName, int numberOfClasses, String studentNumber) {
+    // Rule a) The full name must contain only letters;
+    if (!fullName.matches("^[a-zA-Z ]+$")) {
       return false;
     }
 
@@ -88,7 +75,7 @@ public class Student_Registration {
     // Rule d) The "number" of the student must have a minimum of 6 characters,
     // with the first 2 characters being numbers, the 3rd and 4th characters (and possibly the 5th)
     // being a letter, and everything after the last letter character being a number.
-    if (!studentNumber.matches("^\\d{2}[a-zA-Z]{1,2}\\d+$")) {
+    if (!studentNumber.matches("^\\d{2}[a-zA-Z]{2,3}\\d+$")) {
       return false;
     }
 
@@ -100,14 +87,14 @@ public class Student_Registration {
    *
    * @param writer        FileWriter object for writing to the file.
    * @param studentNumber The student number.
-   * @param secondName    The second name of the student.
+   * @param fullName      The second name of the student.
    * @param workload      The workload determined by the number of classes.
    * @throws IOException If an I/O error occurs while writing to the file.
    */
-  private static void writeToFile(FileWriter writer, String studentNumber, String secondName,
+  private static void writeToFile(FileWriter writer, String studentNumber, String fullName,
       String workload) throws IOException {
     // Writing formatted student data to the file
-    writer.write(String.format("%s – %s\n%s\n", studentNumber, secondName, workload));
+    writer.write(String.format("%s – %s\n%s\n", studentNumber, fullName, workload));
   }
 
   /**
@@ -130,6 +117,5 @@ public class Student_Registration {
       return "Invalid Number of Classes";
     }
   }
-
 
 }
