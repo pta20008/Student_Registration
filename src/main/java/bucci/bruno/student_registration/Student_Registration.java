@@ -5,12 +5,15 @@
 package bucci.bruno.student_registration;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Bruno Bucci
@@ -19,14 +22,15 @@ public class Student_Registration {
 
   static Scanner consoleScanner = new Scanner(System.in);
 
-  public static void main(String[] args) throws FileNotFoundException {
+  public static void main(String[] args) throws IOException {
 
     int choice = 0;
     boolean repeat = false;
 
     do {
       System.out.println("========= Main Menu =========");
-      System.out.println("1. Standard operation\n2. Add student data\n3. Press 3 for exit program\n");
+      System.out.println(
+          "1. Standard operation\n2. Add student data\n3. Press 3 for exit program\n");
       choice = consoleScanner.nextInt();
 
       if (choice == 1) {
@@ -45,24 +49,39 @@ public class Student_Registration {
   }
 
   private static boolean createNewStudent() {
-    System.out.println("Please, input Student Name:");
-    String fullName = consoleScanner.next();
+    try {
+      System.out.println("Please, input Student First Name:");
+      String firstName = consoleScanner.next();
 
-    System.out.println("Please, input number of classes:");
-    Integer numberOfClasses = consoleScanner.nextInt();
+      System.out.println("Please, input Student Second Name:");
+      String secondName = consoleScanner.next();
 
-    System.out.println("Please, input Student Number:");
-    String studentNumber = consoleScanner.next();
+      System.out.println("Please, input number of classes:");
+      int numberOfClasses = consoleScanner.nextInt();
 
-    boolean validData = isValidData(fullName, numberOfClasses, studentNumber);
+      System.out.println("Please, input Student Number:");
+      String studentNumber = consoleScanner.next();
 
-    if (validData) {
-      processStudentData();
+      boolean validData = isValidData(firstName, secondName, numberOfClasses, studentNumber);
+
+      if (validData) {
+        // Using try-with-resources to automatically close the BufferedWriter
+        try (BufferedWriter br = new BufferedWriter(new FileWriter("students.txt", true))) {
+          writeToFileStudent(br, firstName, secondName, numberOfClasses, studentNumber);
+        }
+      }
+
+      return validData;
+    } catch (IOException e) {
+      e.printStackTrace();
+      return false;
     }
-
-    return validData;
   }
 
+
+  /**
+   * Method to show students details at terminal
+   */
   private static void showStatusDetails() throws FileNotFoundException {
     Scanner fileScanner = new Scanner(new File("status.txt"));
 
@@ -72,7 +91,6 @@ public class Student_Registration {
     }
 
   }
-
 
   /**
    * Method for processing student data, reading files and writing
@@ -88,16 +106,18 @@ public class Student_Registration {
       while ((line = reader.readLine()) != null) {
         // Rule: Ensure that the line contains at least one part (full name)
         if (!line.isEmpty()) {
-          String fullName = line;
+          String[] firstAndSecondName = line.split(" ");
           int numberOfClasses = Integer.parseInt(reader.readLine());
 
           String studentNumberLine = reader.readLine();
           String studentNumber = studentNumberLine.trim().replaceAll("[^0-9a-zA-Z]", "");
 
           // Rule: Validate the student data
-          if (isValidData(fullName, numberOfClasses, studentNumber)) {
+          if (isValidData(firstAndSecondName[0], firstAndSecondName[1], numberOfClasses,
+              studentNumber)) {
             // Rule: Write the valid data to the "status.txt" file
-            writeToFile(writer, studentNumber, fullName, getWorkload(numberOfClasses));
+            writeToFileStatus(writer, studentNumber, firstAndSecondName[1],
+                getWorkload(numberOfClasses));
           } else {
             System.out.println("Error: Invalid data for student");
           }
@@ -121,27 +141,59 @@ public class Student_Registration {
   /**
    * Checks if the student data is valid according to the specified rules.
    *
-   * @param fullName        The first name of the student.
+   * @param firstName       The first name of the student.
+   * @param secondName      The second name of the student.
    * @param numberOfClasses The number of classes the student is enrolled in.
    * @param studentNumber   The student number.
    * @return True if the data is valid, False otherwise.
    */
-  private static boolean isValidData(String fullName, int numberOfClasses, String studentNumber) {
-    // Rule a) The full name must contain only letters;
-    if (!fullName.matches("^[a-zA-Z ]+$")) {
+  private static boolean isValidData(String firstName, String secondName, int numberOfClasses,
+      String studentNumber) {
+    // Rule a) The first name must contain only letters;
+    if (!firstName.matches("^[a-zA-Z ]+$")) {
+      System.out.println("Error: The first name must contain only letters");
       return false;
     }
 
-    // Rule b) The number of classes must be an integer value between 1 and 8 (inclusive);
+    // Rule b) The second name must contain letters and numbers.
+    if (!secondName.matches("[a-zA-Z0-9]+")) {
+      System.out.println("Error: The second name must contain letters and numbers");
+      return false;
+    }
+
+    // Rule c) The number of classes must be an integer value between 1 and 8 (inclusive);
     if (numberOfClasses < 1 || numberOfClasses > 8) {
+      System.out.println("Error: The number of classes must be an integer value between 1 and 8");
       return false;
     }
 
-    // Rule c) The "number" of the student must have a minimum of 6 characters,
+    // Rule d) The "number" of the student must have a minimum of 6 characters,
     // with the first 2 characters being numbers, the 3rd and 4th characters (and possibly the 5th)
     // being a letter, and everything after the last letter character being a number.
     if (!studentNumber.matches("^\\d{2}[a-zA-Z]{2,3}\\d+$")) {
+      System.out.println(
+          "Error: Students number must have min 6 char or the first 2 char being numbers");
+      System.out.println(
+          "Error: the 3rd and 4th characters (and possibly the 5th being a letter and after the last letter char being a number");
       return false;
+    }
+
+    // Rule e) Validate student number year (at least 2020)
+    int year = Integer.parseInt(studentNumber.substring(0, 2));
+    if (year < 20) {
+      System.out.println("Error: Validate student number year (at least 2020)");
+      return false;
+    }
+
+    // Rule f) Validate number after letters in student number (between 1 and 200)
+    Pattern pattern = Pattern.compile("[a-zA-Z](\\d+)");
+    Matcher matcher = pattern.matcher(studentNumber);
+    if (matcher.find()) {
+      Integer finalNumber = Integer.valueOf(matcher.group(1));
+      if (finalNumber < 1 || finalNumber > 2000) {
+        System.out.println("Error: Validate number after letters in student number");
+        return false;
+      }
     }
 
     return true;
@@ -152,14 +204,32 @@ public class Student_Registration {
    *
    * @param writer        FileWriter object for writing to the file.
    * @param studentNumber The student number.
-   * @param fullName      The second name of the student.
+   * @param secondName    The second name of the student.
    * @param workload      The workload determined by the number of classes.
    * @throws IOException If an I/O error occurs while writing to the file.
    */
-  private static void writeToFile(FileWriter writer, String studentNumber, String fullName,
+  private static void writeToFileStatus(FileWriter writer, String studentNumber, String secondName,
       String workload) throws IOException {
     // Writing formatted student data to the file
-    writer.write(String.format("%s – %s\n%s\n", studentNumber, fullName, workload));
+    writer.write(String.format("%s – %s\n%s\n", studentNumber, secondName, workload));
+  }
+
+  /**
+   * Writes student data to a file in the specified format.
+   *
+   * @param br              BufferedWriter object for writing to the file.
+   * @param firstName       The First name of the student.
+   * @param secondName      The second name of the student.
+   * @param numberOfClasses The number of classes that student has enrolled.
+   * @param studentNumber   The number of student registration.
+   * @throws IOException If an I/O error occurs while writing to the file.
+   */
+  private static void writeToFileStudent(BufferedWriter br, String firstName, String secondName,
+      int numberOfClasses,
+      String studentNumber) throws IOException {
+    // Writing formatted student data to the file
+    br.write(
+        String.format("%s %s\n%s\n%s\n", firstName, secondName, numberOfClasses, studentNumber));
   }
 
   /**
