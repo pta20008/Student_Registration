@@ -1,22 +1,78 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Github: https://github.com/pta20008/Student_Registration.git
  */
 
 package bucci.bruno.student_registration;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Scanner;
 
 /**
  * @author Bruno Bucci
  */
 public class Student_Registration {
 
-  public static void main(String[] args) {
-    processStudentData();
+  static Scanner consoleScanner = new Scanner(System.in);
+
+  public static void main(String[] args) throws FileNotFoundException {
+
+    int choice = 0;
+    boolean repeat = false;
+
+    do {
+      System.out.println("========= Main Menu =========");
+      System.out.println("1. Standard operation\n2. Add student data\n3. Press 3 for exit program\n");
+      choice = consoleScanner.nextInt();
+
+      if (choice == 1) {
+        processStudentData();
+        showStatusDetails();
+        repeat = true;
+      } else if (choice == 2) {
+        createNewStudent();
+        repeat = true;
+      } else {
+        System.out.println("Program finished!");
+        repeat = false;
+      }
+
+    } while (repeat);
   }
+
+  private static boolean createNewStudent() {
+    System.out.println("Please, input Student Name:");
+    String fullName = consoleScanner.next();
+
+    System.out.println("Please, input number of classes:");
+    Integer numberOfClasses = consoleScanner.nextInt();
+
+    System.out.println("Please, input Student Number:");
+    String studentNumber = consoleScanner.next();
+
+    boolean validData = isValidData(fullName, numberOfClasses, studentNumber);
+
+    if (validData) {
+      processStudentData();
+    }
+
+    return validData;
+  }
+
+  private static void showStatusDetails() throws FileNotFoundException {
+    Scanner fileScanner = new Scanner(new File("status.txt"));
+
+    while (fileScanner.hasNext()) {
+      System.out.println(fileScanner.nextLine());
+      System.out.println(fileScanner.nextLine());
+    }
+
+  }
+
 
   /**
    * Method for processing student data, reading files and writing
