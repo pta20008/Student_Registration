@@ -24,18 +24,32 @@ public class Student_Registration {
 
   public static void main(String[] args) throws IOException {
 
+    //Create variables
     int choice = 0;
     boolean repeat = false;
 
+    //Method that run system and menu
     do {
       System.out.println("========= Main Menu =========");
       System.out.println(
           "1. Standard operation\n2. Add student data\n3. Press 3 for exit program\n");
       choice = consoleScanner.nextInt();
 
+      // Condition Structure to validate the choice
       if (choice == 1) {
-        processStudentData();
-        showStatusDetails();
+        BufferedReader reader = null;
+
+        try {
+          reader = new BufferedReader(new FileReader("students.txt"));
+        } catch (FileNotFoundException e) {
+          System.out.println("Students.txt file not found");
+        }
+
+        if (reader != null) {
+          processStudentData(reader);
+          showStatusDetails();
+        }
+
         repeat = true;
       } else if (choice == 2) {
         createNewStudent();
@@ -48,6 +62,11 @@ public class Student_Registration {
     } while (repeat);
   }
 
+  /**
+   * Create new student following the rules necessary.
+   *
+   * @return True if the student are created with success.
+   */
   private static boolean createNewStudent() {
     try {
       System.out.println("Please, input Student First Name:");
@@ -62,8 +81,10 @@ public class Student_Registration {
       System.out.println("Please, input Student Number:");
       String studentNumber = consoleScanner.next();
 
+      // Check if the provided data are valid
       boolean validData = isValidData(firstName, secondName, numberOfClasses, studentNumber);
 
+      // If is valid write on the students.txt
       if (validData) {
         // Using try-with-resources to automatically close the BufferedWriter
         try (BufferedWriter br = new BufferedWriter(new FileWriter("students.txt", true))) {
@@ -72,15 +93,17 @@ public class Student_Registration {
       }
 
       return validData;
+      // If an exception happened return false
     } catch (IOException e) {
       e.printStackTrace();
       return false;
     }
   }
 
-
   /**
    * Method to show students details at terminal
+   *
+   * @throws FileNotFoundException If an error occurs while searching for the file.
    */
   private static void showStatusDetails() throws FileNotFoundException {
     Scanner fileScanner = new Scanner(new File("status.txt"));
@@ -89,17 +112,16 @@ public class Student_Registration {
       System.out.println(fileScanner.nextLine());
       System.out.println(fileScanner.nextLine());
     }
-
   }
 
   /**
    * Method for processing student data, reading files and writing
    */
-  private static void processStudentData() {
+  private static void processStudentData(BufferedReader reader) {
     FileWriter writer = null;
 
     try {
-      BufferedReader reader = new BufferedReader(new FileReader("students.txt"));
+      // Get students.txt file
       writer = new FileWriter("status.txt");
 
       String line;
@@ -128,6 +150,7 @@ public class Student_Registration {
     } catch (IOException e) {
       e.printStackTrace();
     } finally {
+      // Close connection
       try {
         if (writer != null) {
           writer.close();
