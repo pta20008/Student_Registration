@@ -32,7 +32,7 @@ public class Student_Registration {
     do {
       System.out.println("========= Main Menu =========");
       System.out.println(
-          "1. Standard operation\n2. Add student data\n3. Press 3 for exit program\n");
+          "1. Read student data\n2. Add student data\n3. Press 3 for exit program\n");
       choice = consoleScanner.nextInt();
 
       // Condition Structure to validate the choice
